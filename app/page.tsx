@@ -7,14 +7,59 @@ import {
   getBestSellers,
   getNewProducts,
 } from '@/data/products'
+import {
+  fetchSuperMasCatalog,
+  adaptSuperMasProductToStore,
+} from '@/lib/api/catalog'
 import { ProductCarousel } from '@/components/product/product-carousel'
 import { SectionHeading } from '@/components/ui/section-heading'
 import { SolarIcon } from '@/components/ui/solar-icon'
 
-export default function HomePage() {
-  const onSaleProducts = getOnSaleProducts()
-  const bestSellers = getBestSellers()
-  const newProducts = getNewProducts()
+export const dynamic = 'force-dynamic'
+
+export default async function HomePage() {
+  const { products: apiProducts, isLive } = await fetchSuperMasCatalog({ limit: 50 })
+  const storeProducts = apiProducts.map(adaptSuperMasProductToStore)
+
+  // 1. Ofertas y Promociones: productos de la plataforma en vivo
+  const discounted = storeProducts.filter(
+    (p) => p.onSale || (p.previousPrice && p.previousPrice > p.price),
+  )
+  const onSaleProducts =
+    discounted.length > 0
+      ? discounted
+      : storeProducts.length > 0
+        ? storeProducts
+        : isLive
+          ? []
+          : getOnSaleProducts()
+
+  // 2. Los Más Vendidos: si hay más de 1 producto en la plataforma o destacados
+  const bestSellerList = storeProducts.filter((p) => p.bestSeller)
+  const bestSellers =
+    bestSellerList.length > 0
+      ? bestSellerList
+      : storeProducts.length > 1
+        ? storeProducts.slice(1)
+        : storeProducts.length === 1
+          ? []
+          : isLive
+            ? []
+            : getBestSellers()
+
+  // 3. Nuevos Ingresos
+  const newList = storeProducts.filter((p) => p.isNew)
+  const newProducts =
+    newList.length > 0
+      ? newList
+      : storeProducts.length > 2
+        ? storeProducts.slice(2)
+        : storeProducts.length <= 2
+          ? []
+          : isLive
+            ? []
+            : getNewProducts()
+
 
   return (
     <div className="flex flex-col gap-10 pb-16 sm:gap-14 sm:pb-24 pt-4 sm:pt-6">
@@ -293,17 +338,19 @@ export default function HomePage() {
       </section>
 
       {/* 6. LO MÁS VENDIDO (Product Carousel) */}
-      <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeading
-          title="Los Más Vendidos"
-          subtitle="Las referencias con mayor rotación en nuestro catálogo"
-          href="/productos"
-          linkLabel="Ver catálogo"
-        />
-        <div className="mt-5">
-          <ProductCarousel products={bestSellers} />
-        </div>
-      </section>
+      {bestSellers.length > 0 && (
+        <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            title="Los Más Vendidos"
+            subtitle="Las referencias con mayor rotación en nuestro catálogo"
+            href="/productos"
+            linkLabel="Ver catálogo"
+          />
+          <div className="mt-5">
+            <ProductCarousel products={bestSellers} />
+          </div>
+        </section>
+      )}
 
       {/* 7. NUEVOS INGRESOS (Product Carousel) */}
       {newProducts.length > 0 && (

@@ -30,15 +30,12 @@ export function ProductDetailView({
   const [activeTab, setActiveTab] = useState<'desc' | 'info' | 'pres' | 'envios'>('desc')
   const [added, setAdded] = useState(false)
 
-  // Array of gallery images (with fallbacks if only 1 image provided)
-  const images = product.images.length > 1
-    ? product.images
-    : [
-        product.images[0] || '/placeholder.svg',
-        product.images[0] || '/placeholder.svg',
-        product.images[0] || '/placeholder.svg',
-        product.images[0] || '/placeholder.svg',
-      ]
+  // Actual product images from platform without artificial 4-image duplication
+  const images =
+    product.images && product.images.length > 0
+      ? product.images.filter(Boolean)
+      : ['/placeholder.svg']
+  const hasMultipleImages = images.length > 1
 
   function handleAddToCart() {
     if (product.stock <= 0) return
@@ -90,24 +87,28 @@ export function ProductDetailView({
               <SolarIcon icon="solar:magnifier-zoom-in-linear" className="size-4" />
             </button>
 
-            {/* Navigation Arrows on image */}
-            <button
-              type="button"
-              aria-label="Imagen anterior"
-              onClick={() => setSelectedImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))}
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-600 border border-slate-200 shadow-xs hover:bg-white active:scale-95"
-            >
-              <SolarIcon icon="solar:alt-arrow-left-linear" className="size-4" />
-            </button>
+            {/* Navigation Arrows on image (only if multiple images exist) */}
+            {hasMultipleImages && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Imagen anterior"
+                  onClick={() => setSelectedImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-600 border border-slate-200 shadow-xs hover:bg-white active:scale-95"
+                >
+                  <SolarIcon icon="solar:alt-arrow-left-linear" className="size-4" />
+                </button>
 
-            <button
-              type="button"
-              aria-label="Imagen siguiente"
-              onClick={() => setSelectedImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-600 border border-slate-200 shadow-xs hover:bg-white active:scale-95"
-            >
-              <SolarIcon icon="solar:alt-arrow-right-linear" className="size-4" />
-            </button>
+                <button
+                  type="button"
+                  aria-label="Imagen siguiente"
+                  onClick={() => setSelectedImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-600 border border-slate-200 shadow-xs hover:bg-white active:scale-95"
+                >
+                  <SolarIcon icon="solar:alt-arrow-right-linear" className="size-4" />
+                </button>
+              </>
+            )}
 
             {/* Main Product Image */}
             <div className="relative size-full max-h-[380px] max-w-[380px]">
@@ -122,33 +123,36 @@ export function ProductDetailView({
             </div>
           </div>
 
-          {/* Thumbnails Row */}
-          <div className="grid grid-cols-4 gap-3">
-            {images.map((img, index) => {
-              const isSelected = selectedImageIndex === index
-              return (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => setSelectedImageIndex(index)}
-                  className={cn(
-                    'relative aspect-square overflow-hidden rounded-xl bg-white p-2 transition-all border',
-                    isSelected
-                      ? 'border-2 border-red shadow-xs'
-                      : 'border-slate-200 opacity-75 hover:opacity-100 hover:border-slate-300',
-                  )}
-                >
-                  <Image
-                    src={img}
-                    alt={`${product.name} miniatura ${index + 1}`}
-                    fill
-                    sizes="80px"
-                    className="object-contain p-1"
-                  />
-                </button>
-              )
-            })}
-          </div>
+          {/* Thumbnails Row (rendered only if multiple images exist) */}
+          {hasMultipleImages && (
+            <div className="flex flex-wrap gap-2.5 sm:gap-3">
+              {images.map((img, index) => {
+                const isSelected = selectedImageIndex === index
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setSelectedImageIndex(index)}
+                    aria-label={`Ver imagen ${index + 1}`}
+                    className={cn(
+                      'relative size-16 sm:size-20 shrink-0 overflow-hidden rounded-xl bg-white p-1.5 transition-all border',
+                      isSelected
+                        ? 'border-2 border-red shadow-xs'
+                        : 'border-slate-200 opacity-75 hover:opacity-100 hover:border-slate-300',
+                    )}
+                  >
+                    <Image
+                      src={img}
+                      alt={`${product.name} miniatura ${index + 1}`}
+                      fill
+                      sizes="80px"
+                      className="object-contain p-1"
+                    />
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {/* Right Sticky Info Box (col-span-6) */}
@@ -464,7 +468,7 @@ export function ProductDetailView({
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-4">
-            {relatedProducts.slice(0, 4).map((p) => (
+            {relatedProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>

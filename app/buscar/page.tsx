@@ -1,10 +1,16 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { searchProducts, products } from '@/data/products'
+import { searchProducts, products as localProducts } from '@/data/products'
 import { getCategoryBySlug } from '@/data/categories'
+import {
+  fetchSuperMasCatalog,
+  adaptSuperMasProductToStore,
+} from '@/lib/api/catalog'
 import { site } from '@/data/site'
 import { ProductGrid } from '@/components/product/product-grid'
 import { SolarIcon } from '@/components/ui/solar-icon'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: `Resultados de Búsqueda | ${site.name}`,
@@ -20,12 +26,30 @@ export default async function BuscarPage({
   const query = params.q || ''
   const categorySlug = params.categoria || ''
 
-  let results = query ? searchProducts(query) : products
-  if (categorySlug) {
-    results = results.filter((p) => p.category === categorySlug)
+  let results: ReturnType<typeof adaptSuperMasProductToStore>[] = []
+  try {
+    const apiRes = await fetchSuperMasCatalog({
+      search: query,
+      category: categorySlug,
+      limit: 60,
+    })
+    if (apiRes.products.length > 0) {
+      results = apiRes.products.map(adaptSuperMasProductToStore)
+    }
+  } catch {
+    // ignore
+  }
+
+  if (results.length === 0) {
+    let localList = query ? searchProducts(query) : localProducts
+    if (categorySlug) {
+      localList = localList.filter((p) => p.category === categorySlug)
+    }
+    results = localList
   }
 
   const category = categorySlug ? getCategoryBySlug(categorySlug) : null
+
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8 space-y-8">

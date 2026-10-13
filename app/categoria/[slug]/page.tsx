@@ -2,14 +2,14 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { categories, getCategoryBySlug } from '@/data/categories'
 import { getProductsByCategory } from '@/data/products'
+import {
+  fetchSuperMasCatalog,
+  adaptSuperMasProductToStore,
+} from '@/lib/api/catalog'
 import { site } from '@/data/site'
 import { CategoryView } from '@/components/category/category-view'
 
-export async function generateStaticParams() {
-  return categories.map((cat) => ({
-    slug: cat.slug,
-  }))
-}
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({
   params,
@@ -35,11 +35,27 @@ export default async function CategoryPage({
   const category = getCategoryBySlug(slug)
   if (!category) notFound()
 
-  const products = getProductsByCategory(category.slug)
+  let categoryProducts: ReturnType<typeof adaptSuperMasProductToStore>[] = []
+  try {
+    const apiRes = await fetchSuperMasCatalog({
+      category: category.name,
+      limit: 100,
+    })
+    if (apiRes.products.length > 0) {
+      categoryProducts = apiRes.products.map(adaptSuperMasProductToStore)
+    }
+  } catch {
+    // ignore
+  }
+
+  if (categoryProducts.length === 0) {
+    categoryProducts = getProductsByCategory(category.slug)
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-      <CategoryView category={category} initialProducts={products} />
+      <CategoryView category={category} initialProducts={categoryProducts} />
     </div>
   )
 }
+

@@ -10,7 +10,8 @@ export const site = {
     'Distribuidora multiproducto para hogar, negocio y consumidor final. Compra al detal y al por mayor con precios especiales por volumen.',
   url: 'https://distribuidora-super-plus.example.com', // PLACEHOLDER
 
-  logo: '/logo-super-plus.jpg',
+  logo: '/logo-super.webp',
+  logoWhite: '/logo-super-white.webp',
 
   // ---- Contacto (PLACEHOLDER: reemplazar con datos oficiales) ----
   contact: {

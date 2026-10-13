@@ -34,23 +34,27 @@ export function ProductCarousel({ products }: { products: Product[] }) {
       </div>
 
       {/* Navigation Arrows */}
-      <button
-        type="button"
-        onClick={() => scrollBy(-1)}
-        aria-label="Anterior"
-        className="absolute -left-3 top-1/2 z-20 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-md transition-all hover:bg-slate-50 hover:text-primary active:scale-95 md:flex"
-      >
-        <SolarIcon icon="solar:alt-arrow-left-linear" className="size-4" />
-      </button>
+      {products.length > 4 && (
+        <>
+          <button
+            type="button"
+            onClick={() => scrollBy(-1)}
+            aria-label="Anterior"
+            className="absolute -left-3 top-1/2 z-20 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-md transition-all hover:bg-slate-50 hover:text-primary active:scale-95 md:flex"
+          >
+            <SolarIcon icon="solar:alt-arrow-left-linear" className="size-4" />
+          </button>
 
-      <button
-        type="button"
-        onClick={() => scrollBy(1)}
-        aria-label="Siguiente"
-        className="absolute -right-3 top-1/2 z-20 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-md transition-all hover:bg-slate-50 hover:text-primary active:scale-95 md:flex"
-      >
-        <SolarIcon icon="solar:alt-arrow-right-linear" className="size-4" />
-      </button>
+          <button
+            type="button"
+            onClick={() => scrollBy(1)}
+            aria-label="Siguiente"
+            className="absolute -right-3 top-1/2 z-20 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-md transition-all hover:bg-slate-50 hover:text-primary active:scale-95 md:flex"
+          >
+            <SolarIcon icon="solar:alt-arrow-right-linear" className="size-4" />
+          </button>
+        </>
+      )}
     </div>
   )
 }

@@ -17,8 +17,8 @@ export function SiteFooter() {
         <div className="grid grid-cols-1 gap-10 text-center sm:grid-cols-2 sm:text-left lg:grid-cols-12">
           {/* Column 1: Brand & Social (col-span-3) */}
           <div className="flex flex-col items-center space-y-4 sm:items-start lg:col-span-3">
-            <div className="inline-block rounded-xl bg-white p-2">
-              <Logo height={42} width={150} />
+            <div>
+              <Logo variant="white" height={44} width={155} />
             </div>
             <p className="text-xs leading-relaxed text-slate-400 max-w-sm sm:max-w-none">
               Distribuidora Super+, todo lo que necesitas en un solo lugar. Productos para el hogar, cuidado personal, ferretería y más.

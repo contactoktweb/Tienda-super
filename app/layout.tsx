@@ -4,10 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { Suspense } from 'react'
 import { Toaster } from 'sonner'
 import { site } from '@/data/site'
-import { SiteHeader } from '@/components/layout/site-header'
-import { SiteFooter } from '@/components/layout/site-footer'
-import { MobileTabBar } from '@/components/layout/mobile-tab-bar'
-import { CartDrawer } from '@/components/cart/cart-drawer'
+import { StoreShell } from '@/components/layout/store-shell'
 import './globals.css'
 
 const inter = Inter({
@@ -70,13 +67,7 @@ export default function RootLayout({
   return (
     <html lang="es" data-scroll-behavior="smooth" className={`${inter.variable} ${barlow.variable}`}>
       <body className="min-h-dvh bg-background font-sans antialiased">
-        <Suspense fallback={null}>
-          <SiteHeader />
-        </Suspense>
-        <main className="pb-16 lg:pb-0">{children}</main>
-        <SiteFooter />
-        <MobileTabBar />
-        <CartDrawer />
+        <StoreShell>{children}</StoreShell>
         <Toaster
           position="bottom-right"
           toastOptions={{
@@ -87,6 +78,7 @@ export default function RootLayout({
         />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
+
     </html>
   )
 }
