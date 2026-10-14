@@ -7,7 +7,7 @@ import { SolarIcon } from '@/components/ui/solar-icon'
 export const metadata: Metadata = {
   title: `Conoce Más de Nosotros | ${site.name}`,
   description:
-    'Somos una distribuidora comprometida con ofrecer productos de calidad para el hogar, cuidado personal, manualidades, adhesivos, limpieza y fiestas.',
+    'Somos una distribuidora comprometida con ofrecer productos de calidad para el hogar, despensa, aseo, cuidado personal y alimentos.',
 }
 
 export default function NosotrosPage() {
@@ -34,11 +34,11 @@ export default function NosotrosPage() {
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-heading text-slate-900 tracking-tight leading-tight">
-            Distribuidora Super+
+            Super Más
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl">
-            Somos una distribuidora comprometida con ofrecer productos de calidad para el hogar, cuidado personal, manualidades, adhesivos, limpieza y fiestas. Trabajamos cada día para que nuestros clientes encuentren todo lo que necesitan en un solo lugar, con los mejores precios y un excelente servicio.
+            En Super Más estamos comprometidos con ofrecer productos de calidad para la despensa, aseo del hogar, cuidado personal y alimentos de primera necesidad. Trabajamos cada día para que nuestros clientes encuentren todo lo que necesitan en un solo lugar, con los mejores precios y un excelente servicio.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -72,7 +72,7 @@ export default function NosotrosPage() {
             
             <Image
               src="/wholesale-boxes.png"
-              alt="Bodega de distribución Super+"
+              alt="Instalaciones Super Más"
               fill
               priority
               className="object-cover p-6 scale-110"
@@ -159,7 +159,7 @@ export default function NosotrosPage() {
             <div className="relative z-10 text-center space-y-2">
               <div className="inline-block rounded-xl bg-white p-2.5 shadow-md">
                 <span className="text-base font-extrabold tracking-tight text-primary font-heading">
-                  DISTRIBUIDORA <span className="text-red">SUPER+</span>
+                  SUPER <span className="text-red">MÁS</span>
                 </span>
               </div>
               <p className="text-[11px] text-slate-200 max-w-xs mx-auto leading-tight">

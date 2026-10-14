@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { categories, getCategoryBySlug } from '@/data/categories'
+import { categories, getCategoryBySlug, getCategoryBySlugAsync } from '@/data/categories'
 import { getProductsByCategory } from '@/data/products'
 import {
   fetchSuperMasCatalog,
@@ -17,7 +17,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const category = getCategoryBySlug(slug)
+  const category = await getCategoryBySlugAsync(slug)
   if (!category) return { title: 'Categoría no encontrada' }
 
   return {
@@ -32,7 +32,7 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const category = getCategoryBySlug(slug)
+  const category = await getCategoryBySlugAsync(slug)
   if (!category) notFound()
 
   let categoryProducts: ReturnType<typeof adaptSuperMasProductToStore>[] = []

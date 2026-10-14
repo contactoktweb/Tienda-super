@@ -6,29 +6,29 @@ import { SolarIcon } from '@/components/ui/solar-icon'
 export const metadata: Metadata = {
   title: `Nuestras Marcas y Proveedores | ${site.name}`,
   description:
-    'Distribuimos las mejores marcas para el hogar, cuidado personal, belleza, manualidades y adhesivos en Colombia.',
+    'Distribuimos las mejores marcas para el hogar, despensa, aseo, cuidado personal y alimentos en Colombia.',
 }
 
 const featuredBrands = [
   {
-    name: 'Cuidado y Belleza',
-    desc: 'Líneas especializadas en higiene corporal, aceites terapéuticos, cosméticos y cuidado diario.',
-    categories: ['Cuidado Personal', 'Belleza'],
+    name: 'Abarrotes y Despensa',
+    desc: 'Productos esenciales de canasta familiar, salsas, condimentos, harinas y granos seleccionados.',
+    categories: ['Abarrotes y Despensa', 'Granos y Cereales', 'Panadería y Harinas'],
   },
   {
-    name: 'Adhesivos y Fijación',
-    desc: 'Siliconas líquidas, pegantes de contacto, barras de silicona y soluciones de fijación.',
-    categories: ['Adhesivos', 'Manualidades'],
+    name: 'Aseo del Hogar y Limpieza',
+    desc: 'Detergentes, desinfectantes, blanqueadores y artículos esenciales para el cuidado del hogar y negocio.',
+    categories: ['Aseo del Hogar'],
   },
   {
-    name: 'Hogar y Limpieza',
-    desc: 'Fórmulas concentradas y artículos esenciales para la desinfección y mantenimiento de espacios.',
-    categories: ['Hogar y Limpieza'],
+    name: 'Cuidado e Higiene Personal',
+    desc: 'Líneas especializadas en higiene corporal, champús, jabones y cuidado diario para toda la familia.',
+    categories: ['Cuidado Personal'],
   },
   {
-    name: 'Papelería y Fiestas',
-    desc: 'Materiales escolares, escarchas, foamy, artículos para eventos y decoración festiva.',
-    categories: ['Manualidades', 'Fiestas'],
+    name: 'Alimentos y Bebidas',
+    desc: 'Bebidas refrescantes, enlatados de larga conservación, lácteos frescos y confitería para compartir.',
+    categories: ['Bebidas y Refrescos', 'Enlatados y Conservas', 'Lácteos y Huevos', 'Snacks y Confitería'],
   },
 ]
 
@@ -95,7 +95,7 @@ export default function MarcasPage() {
           ¿Eres fabricante o importador?
         </h2>
         <p className="mt-2 text-xs sm:text-sm text-slate-200 max-w-lg">
-          En Distribuidora Super+ ampliamos constantemente nuestro catálogo. Contáctanos para alianzas comerciales y distribución a gran escala.
+          En Super Más ampliamos constantemente nuestro catálogo. Contáctanos para alianzas comerciales y distribución a gran escala.
         </p>
         <a
           href={whatsappLink('Hola, represento a una marca y deseo presentar una propuesta comercial.')}

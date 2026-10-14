@@ -7,12 +7,14 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { SolarIcon } from '@/components/ui/solar-icon'
 import { searchProducts } from '@/data/products'
-import { categories } from '@/data/categories'
+import { useCategories } from '@/hooks/use-categories'
+import { slugifyCategory } from '@/data/categories'
 import { formatPrice } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 export function SearchBar({ className }: { className?: string }) {
   const router = useRouter()
+  const { categories } = useCategories()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('')
   const [open, setOpen] = useState(false)
@@ -20,9 +22,13 @@ export function SearchBar({ className }: { className?: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   const suggestions = useMemo(() => {
-    if (query.trim().length < 2) return []
-    let results = searchProducts(query)
-    if (category) results = results.filter((p) => p.category === category)
+    const trimmed = query.trim()
+    if (trimmed.length < 2) return []
+    let results = searchProducts(trimmed)
+    if (category) {
+      const normCat = slugifyCategory(category)
+      results = results.filter((p) => slugifyCategory(p.category) === normCat)
+    }
     return results.slice(0, 6)
   }, [query, category])
 
@@ -40,17 +46,27 @@ export function SearchBar({ className }: { className?: string }) {
   }, [])
 
   function submit() {
-    if (!query.trim() && !category) return
+    const trimmed = query.trim()
+    if (!trimmed && !category) return
     const params = new URLSearchParams()
-    if (query.trim()) params.set('q', query.trim())
+    if (trimmed) params.set('q', trimmed)
     if (category) params.set('categoria', category)
     router.push(`/buscar?${params.toString()}`)
     setOpen(false)
   }
 
+  function handleFormSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    submit()
+  }
+
   return (
     <div ref={containerRef} className={cn('relative w-full', className)}>
-      <div className="flex h-11 w-full items-stretch overflow-hidden rounded-lg border border-slate-300 bg-white transition-all focus-within:border-primary shadow-xs">
+      <form
+        onSubmit={handleFormSubmit}
+        role="search"
+        className="flex h-11 w-full items-stretch overflow-hidden rounded-lg border border-slate-300 bg-white transition-all focus-within:border-primary shadow-xs"
+      >
         {/* Main Text Input */}
         <div className="relative flex flex-1 items-center">
           <input
@@ -115,14 +131,13 @@ export function SearchBar({ className }: { className?: string }) {
 
         {/* Red Search Button */}
         <button
-          type="button"
-          onClick={submit}
+          type="submit"
           aria-label="Buscar"
-          className="flex h-full items-center justify-center bg-red px-4.5 text-white transition-colors hover:bg-red/90 active:scale-95"
+          className="flex h-full items-center justify-center bg-red px-4.5 text-white transition-colors hover:bg-red/90 active:scale-95 cursor-pointer"
         >
           <SolarIcon icon="solar:magnifier-linear" className="size-4.5" />
         </button>
-      </div>
+      </form>
 
       {/* Autocomplete suggestions popup */}
       <AnimatePresence>

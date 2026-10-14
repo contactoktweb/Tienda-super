@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { searchProducts, products as localProducts } from '@/data/products'
-import { getCategoryBySlug } from '@/data/categories'
+import { getCategoryBySlug, getCategoryBySlugAsync, slugifyCategory } from '@/data/categories'
 import {
   fetchSuperMasCatalog,
   adaptSuperMasProductToStore,
@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: `Resultados de Búsqueda | ${site.name}`,
-  description: 'Encuentra los productos que necesitas en Distribuidora Super+.',
+  description: 'Encuentra los productos que necesitas en Super Más.',
 }
 
 export default async function BuscarPage({
@@ -23,56 +23,123 @@ export default async function BuscarPage({
   searchParams: Promise<{ q?: string; categoria?: string }>
 }) {
   const params = await searchParams
-  const query = params.q || ''
-  const categorySlug = params.categoria || ''
+  const query = (params.q || '').trim()
+  const categorySlug = (params.categoria || '').trim()
+  const category = categorySlug ? await getCategoryBySlugAsync(categorySlug) : null
 
   let results: ReturnType<typeof adaptSuperMasProductToStore>[] = []
   try {
     const apiRes = await fetchSuperMasCatalog({
+      query,
       search: query,
-      category: categorySlug,
+      category: category ? category.name : categorySlug,
       limit: 60,
     })
     if (apiRes.products.length > 0) {
       results = apiRes.products.map(adaptSuperMasProductToStore)
     }
-  } catch {
-    // ignore
+  } catch (err) {
+    console.warn('[BuscarPage] Error fetching ERP catalog:', err)
   }
 
-  if (results.length === 0) {
-    let localList = query ? searchProducts(query) : localProducts
-    if (categorySlug) {
-      localList = localList.filter((p) => p.category === categorySlug)
+  // Complementar con catálogo local de productos filtrados
+  let localList = query ? searchProducts(query) : localProducts
+  if (categorySlug) {
+    const targetSlug = slugifyCategory(categorySlug)
+    localList = localList.filter((p) => slugifyCategory(p.category) === targetSlug)
+  }
+
+  // Fusionar sin duplicados (priorizando productos devueltos por el ERP)
+  const existingSlugs = new Set(results.map((p) => p.slug))
+  for (const lp of localList) {
+    if (!existingSlugs.has(lp.slug)) {
+      results.push(lp)
+      existingSlugs.add(lp.slug)
     }
-    results = localList
   }
 
-  const category = categorySlug ? getCategoryBySlug(categorySlug) : null
-
+  const pageTitle = query
+    ? category
+      ? `Resultados para “${query}” en ${category.name}`
+      : `Resultados para “${query}”`
+    : category
+      ? `Productos en ${category.name}`
+      : 'Búsqueda de Productos'
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8 space-y-8">
       {/* Header */}
-      <div className="flex flex-col gap-1.5 border-b border-border pb-5">
+      <div className="flex flex-col gap-2 border-b border-border pb-5">
         <div className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-primary">
           <SolarIcon icon="solar:magnifier-linear" className="size-3.5" />
           <span>Búsqueda</span>
         </div>
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl font-heading text-foreground">
-          {query ? `Resultados para “${query}”` : 'Búsqueda de Productos'}
+          {pageTitle}
         </h1>
-        {category && (
-          <p className="text-xs text-muted-foreground">
-            Filtrado por: <span className="font-bold text-foreground">{category.name}</span>
-          </p>
+
+        {/* Filtros activos */}
+        {(category || query) && (
+          <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+            <span className="text-muted-foreground">Filtros activos:</span>
+            {query && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-800">
+                <span>Texto: “{query}”</span>
+                {categorySlug ? (
+                  <Link
+                    href={`/buscar?categoria=${encodeURIComponent(categorySlug)}`}
+                    className="hover:text-red transition-colors font-bold ml-0.5"
+                    aria-label="Quitar filtro de texto"
+                  >
+                    ×
+                  </Link>
+                ) : (
+                  <Link
+                    href="/productos"
+                    className="hover:text-red transition-colors font-bold ml-0.5"
+                    aria-label="Quitar filtro de texto"
+                  >
+                    ×
+                  </Link>
+                )}
+              </span>
+            )}
+            {category && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 font-medium text-primary">
+                <span>Categoría: {category.name}</span>
+                {query ? (
+                  <Link
+                    href={`/buscar?q=${encodeURIComponent(query)}`}
+                    className="hover:text-red transition-colors font-bold ml-0.5"
+                    aria-label="Quitar filtro de categoría"
+                  >
+                    ×
+                  </Link>
+                ) : (
+                  <Link
+                    href="/productos"
+                    className="hover:text-red transition-colors font-bold ml-0.5"
+                    aria-label="Quitar filtro de categoría"
+                  >
+                    ×
+                  </Link>
+                )}
+              </span>
+            )}
+            <Link
+              href="/productos"
+              className="text-xs font-semibold text-muted-foreground hover:text-red underline ml-2 transition-colors"
+            >
+              Limpiar filtros
+            </Link>
+          </div>
         )}
       </div>
 
       {/* Results */}
       <div>
         <div className="flex items-center justify-between mb-4 text-xs text-muted-foreground">
-          <span>{results.length} resultados encontrados</span>
+          <span>{results.length} {results.length === 1 ? 'resultado encontrado' : 'resultados encontrados'}</span>
         </div>
 
         {results.length > 0 ? (

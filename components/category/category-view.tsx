@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'motion/react'
 import type { Category, Product } from '@/types'
-import { categories } from '@/data/categories'
+import { useCategories } from '@/hooks/use-categories'
 import { ProductCard } from '@/components/product/product-card'
 import { SolarIcon } from '@/components/ui/solar-icon'
 import { cn } from '@/lib/utils'
@@ -26,6 +26,7 @@ export function CategoryView({
   initialProducts,
   breadcrumbs,
 }: CategoryViewProps) {
+  const { categories } = useCategories()
   const [minPrice, setMinPrice] = useState<number>(0)
   const [maxPrice, setMaxPrice] = useState<number>(100000)
   const [selectedRange, setSelectedRange] = useState<string | null>(null)

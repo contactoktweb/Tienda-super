@@ -7,7 +7,7 @@ import { ContactForm } from '@/components/contact/contact-form'
 export const metadata: Metadata = {
   title: `Contáctanos y Canales de Atención | ${site.name}`,
   description:
-    '¿Tienes dudas, sugerencias o necesitas un pedido especial? Comunícate con Distribuidora Super+ vía WhatsApp, teléfono o formulario de contacto.',
+    '¿Tienes dudas, sugerencias o necesitas un pedido especial? Comunícate con Super Más vía WhatsApp, teléfono o formulario de contacto.',
 }
 
 export default function ContactoPage() {
@@ -185,7 +185,7 @@ export default function ContactoPage() {
                 <SolarIcon icon="solar:map-point-bold" className="size-5" />
               </div>
               <span className="rounded-md bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-white shadow-md mt-1">
-                Distribuidora Super+
+                Super Más
               </span>
             </div>
           </div>

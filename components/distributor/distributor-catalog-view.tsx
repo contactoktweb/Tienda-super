@@ -697,7 +697,7 @@ export function DistributorCatalogView({
       {/* Footer minimalista de créditos */}
       <footer className="mt-16 border-t border-slate-200/80 pt-6 pb-4 text-center text-xs text-slate-500">
         <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
-          <p>© {new Date().getFullYear()} Distribuidora Super+. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} Super Más. Todos los derechos reservados.</p>
           <p>
             <a
               href="https://www.kytcode.lat"

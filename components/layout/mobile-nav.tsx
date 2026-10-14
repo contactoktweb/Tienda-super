@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { SolarIcon } from '@/components/ui/solar-icon'
 import { mainNav } from '@/data/nav'
-import { categories } from '@/data/categories'
+import { useCategories } from '@/hooks/use-categories'
 import { site } from '@/data/site'
 import { Logo } from '@/components/ui/logo'
 import { cn } from '@/lib/utils'
@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 export function MobileNav() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const { categories } = useCategories()
 
   useEffect(() => {
     setOpen(false)

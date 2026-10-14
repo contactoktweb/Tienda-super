@@ -1,13 +1,13 @@
 /**
  * Configuración central de la tienda.
  * Los valores marcados como PLACEHOLDER deben ser reemplazados por la
- * información oficial de Distribuidora Super+ antes de publicar.
+ * información oficial de Super Más antes de publicar.
  */
 export const site = {
-  name: 'Distribuidora Super+',
-  shortName: 'Super+',
+  name: 'Super Más',
+  shortName: 'Super Más',
   description:
-    'Distribuidora multiproducto para hogar, negocio y consumidor final. Compra al detal y al por mayor con precios especiales por volumen.',
+    'Super Más, todo lo que necesitas en un solo lugar. Productos de despensa, aseo, cuidado personal y canasta familiar al detal y al por mayor.',
   url: 'https://distribuidora-super-plus.example.com', // PLACEHOLDER
 
   logo: '/logo-super.webp',

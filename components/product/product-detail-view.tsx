@@ -27,7 +27,6 @@ export function ProductDetailView({
 
   const [quantity, setQuantity] = useState(1)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-  const [activeTab, setActiveTab] = useState<'desc' | 'info' | 'pres' | 'envios'>('desc')
   const [added, setAdded] = useState(false)
 
   // Actual product images from platform without artificial 4-image duplication
@@ -78,15 +77,6 @@ export function ProductDetailView({
         <div className="lg:col-span-6 space-y-4">
           {/* Main Large Image Container */}
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 flex items-center justify-center shadow-xs">
-            {/* Zoom icon button on top right */}
-            <button
-              type="button"
-              aria-label="Ampliar imagen"
-              className="absolute right-3.5 top-3.5 z-10 flex size-8 items-center justify-center rounded-full bg-white text-slate-500 border border-slate-200 shadow-xs hover:text-primary"
-            >
-              <SolarIcon icon="solar:magnifier-zoom-in-linear" className="size-4" />
-            </button>
-
             {/* Navigation Arrows on image (only if multiple images exist) */}
             {hasMultipleImages && (
               <>
@@ -164,16 +154,27 @@ export function ProductDetailView({
                 <span className="rounded bg-emerald-700 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white">
                   Mayorista
                 </span>
-              ) : (
+              ) : product.stock > 0 ? (
                 <span className="rounded bg-primary px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white">
                   Disponible
                 </span>
+              ) : (
+                <span className="rounded bg-slate-600 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white">
+                  Agotado
+                </span>
               )}
 
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-                <span className="size-2 rounded-full bg-emerald-600" />
-                <span>En stock</span>
-              </span>
+              {product.stock > 0 ? (
+                <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+                  <span className="size-2 rounded-full bg-emerald-600" />
+                  <span>En stock</span>
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                  <span className="size-2 rounded-full bg-slate-400" />
+                  <span>Sin stock</span>
+                </span>
+              )}
             </div>
 
             {/* Title & Category */}
@@ -244,7 +245,14 @@ export function ProductDetailView({
                 <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Disponibilidad
                 </span>
-                <span className="font-bold text-emerald-600">Disponible</span>
+                <span
+                  className={cn(
+                    'font-bold',
+                    product.stock > 0 ? 'text-emerald-600' : 'text-slate-500',
+                  )}
+                >
+                  {product.stock > 0 ? 'Disponible' : 'Agotado'}
+                </span>
               </div>
             </div>
 
@@ -326,130 +334,17 @@ export function ProductDetailView({
         </div>
       </div>
 
-      {/* 3. Product Tabs & Specifications */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs space-y-6">
-        {/* Tab Headers */}
-        <div className="flex items-center gap-6 border-b border-slate-200 text-xs font-bold uppercase tracking-wider">
-          <button
-            type="button"
-            onClick={() => setActiveTab('desc')}
-            className={cn(
-              'pb-3 transition-colors',
-              activeTab === 'desc'
-                ? 'border-b-2 border-red text-red'
-                : 'text-slate-500 hover:text-slate-900',
-            )}
-          >
-            Descripción
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('info')}
-            className={cn(
-              'pb-3 transition-colors',
-              activeTab === 'info'
-                ? 'border-b-2 border-red text-red'
-                : 'text-slate-500 hover:text-slate-900',
-            )}
-          >
-            Información adicional
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('pres')}
-            className={cn(
-              'pb-3 transition-colors',
-              activeTab === 'pres'
-                ? 'border-b-2 border-red text-red'
-                : 'text-slate-500 hover:text-slate-900',
-            )}
-          >
-            Presentación
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('envios')}
-            className={cn(
-              'pb-3 transition-colors',
-              activeTab === 'envios'
-                ? 'border-b-2 border-red text-red'
-                : 'text-slate-500 hover:text-slate-900',
-            )}
-          >
-            Envíos
-          </button>
-        </div>
-
-        {/* Tab Content */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-          {/* Left Tab Description */}
-          <div className="lg:col-span-8 space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
-            <p>
-              {product.longDescription || product.description}
-            </p>
-
-            <ul className="space-y-2 pt-2">
-              <li className="flex items-center gap-2 text-slate-800 font-medium">
-                <SolarIcon icon="solar:check-circle-linear" className="size-4 text-emerald-600 shrink-0" />
-                <span>Excelente rendimiento y alta duración en el uso cotidiano.</span>
-              </li>
-              <li className="flex items-center gap-2 text-slate-800 font-medium">
-                <SolarIcon icon="solar:check-circle-linear" className="size-4 text-emerald-600 shrink-0" />
-                <span>Fabricación con estándares de calidad garantizados.</span>
-              </li>
-              <li className="flex items-center gap-2 text-slate-800 font-medium">
-                <SolarIcon icon="solar:check-circle-linear" className="size-4 text-emerald-600 shrink-0" />
-                <span>Presentación práctica y de fácil manipulación o almacenamiento.</span>
-              </li>
-              <li className="flex items-center gap-2 text-slate-800 font-medium">
-                <SolarIcon icon="solar:check-circle-linear" className="size-4 text-emerald-600 shrink-0" />
-                <span>Fórmula y materiales confiables para el hogar o negocio.</span>
-              </li>
-            </ul>
-
-            <div className="pt-2">
-              <strong className="block text-slate-900 font-bold mb-1">Modo de uso / Recomendaciones:</strong>
-              <p className="text-slate-600">
-                Aplica o utiliza según las indicaciones del envase. Consérvese en un lugar fresco y seco, lejos del alcance de niños o fuentes de calor directo.
-              </p>
-            </div>
-          </div>
-
-          {/* Right Highlights Box */}
-          <div className="lg:col-span-4 rounded-2xl bg-slate-50 p-5 space-y-3.5 border border-slate-200/80">
-            <div className="flex items-center gap-3 text-xs text-slate-800 font-semibold">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-white border border-slate-200 text-primary">
-                <SolarIcon icon="solar:shield-minimalistic-linear" className="size-4" />
-              </div>
-              <span>Calidad 100% garantizada</span>
-            </div>
-
-            <div className="flex items-center gap-3 text-xs text-slate-800 font-semibold">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-white border border-slate-200 text-primary">
-                <SolarIcon icon="solar:box-linear" className="size-4" />
-              </div>
-              <span>Empaque seguro y protegido</span>
-            </div>
-
-            <div className="flex items-center gap-3 text-xs text-slate-800 font-semibold">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-white border border-slate-200 text-primary">
-                <SolarIcon icon="solar:clock-circle-linear" className="size-4" />
-              </div>
-              <span>Uso diario y continuo</span>
-            </div>
-
-            <div className="flex items-center gap-3 text-xs text-slate-800 font-semibold">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-white border border-slate-200 text-primary">
-                <SolarIcon icon="solar:delivery-linear" className="size-4" />
-              </div>
-              <span>Despachos a todo el país</span>
-            </div>
+      {/* 3. Product Description (Solo si la trae el sistema y aporta información adicional) */}
+      {product.longDescription && product.longDescription.trim() !== (product.description || '').trim() ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs space-y-3">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-3 font-heading">
+            Descripción detallada
+          </h2>
+          <div className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+            <p>{product.longDescription}</p>
           </div>
         </div>
-      </div>
+      ) : null}
 
       {/* 4. Related Products Section */}
       {relatedProducts.length > 0 && (

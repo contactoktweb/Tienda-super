@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { site, whatsappLink } from '@/data/site'
-import { categories } from '@/data/categories'
+import { categories as defaultCategories, fetchCategories } from '@/data/categories'
 import {
   getOnSaleProducts,
   getBestSellers,
@@ -18,7 +18,10 @@ import { SolarIcon } from '@/components/ui/solar-icon'
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  const { products: apiProducts, isLive } = await fetchSuperMasCatalog({ limit: 50 })
+  const [{ products: apiProducts, isLive }, categoriesList] = await Promise.all([
+    fetchSuperMasCatalog({ limit: 50 }),
+    fetchCategories(),
+  ])
   const storeProducts = apiProducts.map(adaptSuperMasProductToStore)
 
   // 1. Ofertas y Promociones: productos de la plataforma en vivo
@@ -108,7 +111,7 @@ export default async function HomePage() {
               <div className="relative flex items-center justify-center sm:col-span-5 aspect-square sm:aspect-auto sm:h-72">
                 <Image
                   src="/hero-products.png"
-                  alt="Productos de Distribuidora Super+"
+                  alt="Productos de Super Más"
                   fill
                   priority
                   className="object-contain"
@@ -240,8 +243,8 @@ export default async function HomePage() {
           linkLabel="Ver todo"
         />
 
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {categories.map((c) => (
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {categoriesList.map((c) => (
             <Link
               key={c.id}
               href={`/categoria/${c.slug}`}
@@ -326,7 +329,7 @@ export default async function HomePage() {
               <div className="relative w-full max-w-sm aspect-[4/3] rounded-lg border border-slate-700 bg-slate-900 p-4">
                 <Image
                   src="/wholesale-boxes.png"
-                  alt="Venta mayorista Distribuidora Super+"
+                  alt="Venta mayorista Super Más"
                   fill
                   className="object-contain p-2"
                   sizes="(max-width: 768px) 100vw, 35vw"

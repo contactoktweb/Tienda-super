@@ -33,8 +33,8 @@ export const metadata: Metadata = {
     'mayorista',
     'productos para el hogar',
     'cuidado personal',
-    'adhesivos',
-    'super+',
+    'super mas',
+    'super más',
   ],
   openGraph: {
     type: 'website',

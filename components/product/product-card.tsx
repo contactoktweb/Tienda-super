@@ -15,7 +15,6 @@ import { cn } from '@/lib/utils'
 export function ProductCard({ product }: { product: Product }) {
   const addItem = useCartStore((s) => s.addItem)
   const openCart = useCartStore((s) => s.openCart)
-  const [favorite, setFavorite] = useState(false)
   const [added, setAdded] = useState(false)
 
   const discount = discountPercent(product.price, product.previousPrice)
@@ -57,25 +56,6 @@ export function ProductCard({ product }: { product: Product }) {
             </span>
           ) : null}
         </div>
-
-        {/* Favorite Action */}
-        <button
-          type="button"
-          aria-pressed={favorite}
-          aria-label={favorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-          onClick={() => {
-            setFavorite((f) => !f)
-            toast(favorite ? 'Quitado de favoritos' : 'Agregado a favoritos', {
-              description: product.name,
-            })
-          }}
-          className="absolute right-2.5 top-2.5 z-10 flex size-7 items-center justify-center rounded-full bg-white text-slate-400 border border-slate-200/90 shadow-xs transition-colors hover:text-red hover:border-red/30"
-        >
-          <SolarIcon
-            icon={favorite ? 'solar:heart-bold' : 'solar:heart-linear'}
-            className={cn('size-3.5', favorite && 'text-red')}
-          />
-        </button>
 
         {/* Product Image stretching edge-to-edge */}
         <Link

@@ -8,6 +8,12 @@ import type {
 } from '@/types/catalog'
 import type { Product } from '@/types'
 import { products as localProducts } from '@/data/products'
+import {
+  slugifyCategory,
+  categories as synchronizedCategories,
+  isTestCategory,
+  getCategoryBySlug,
+} from '@/data/categories'
 
 /**
  * Convierte un producto del API de Super Más al modelo de la tienda.
@@ -29,7 +35,7 @@ export function adaptSuperMasProductToStore(p: PublicSuperMasProduct): Product {
     name: p.name,
     description: p.description || p.name,
     longDescription: p.description || p.name,
-    category: p.category ? p.category.toLowerCase().replace(/\s+/g, '-') : 'general',
+    category: p.category ? slugifyCategory(p.category) : 'general',
     price: p.price,
     previousPrice: null,
     wholesalePrice: null,
@@ -62,7 +68,7 @@ function adaptLocalProductToDistributor(p: Product): PublicDistributorProduct {
     slug: p.slug,
     description: p.description,
     category: p.category.replace(/-/g, ' '),
-    brand: 'Super+',
+    brand: 'Super Más',
     unitOfMeasure: p.unit,
     imageUrl: p.images[0] || null,
     images: p.images,
@@ -83,9 +89,16 @@ function adaptLocalProductToDistributor(p: Product): PublicDistributorProduct {
 function buildQueryString(params?: CatalogQueryParams): string {
   if (!params) return ''
   const q = new URLSearchParams()
-  if (params.search) q.set('search', params.search)
-  if (params.q) q.set('q', params.q)
-  if (params.category) q.set('category', params.category)
+  const searchTerm = (params.query || params.search || params.q || '').trim()
+  if (searchTerm) {
+    // El API del ERP Super Más requiere específicamente 'query' para búsqueda textual
+    q.set('query', searchTerm)
+  }
+  if (params.category) {
+    const cleanCat = params.category.trim()
+    const foundCat = getCategoryBySlug(cleanCat)
+    q.set('category', foundCat ? foundCat.name : cleanCat)
+  }
   if (params.brand) q.set('brand', params.brand)
   if (params.availability) q.set('availability', params.availability)
   if (params.minPrice !== undefined) q.set('minPrice', String(params.minPrice))
@@ -175,7 +188,7 @@ export async function fetchSuperMasProductBySlug(slug: string): Promise<PublicSu
     slug: local.slug,
     description: local.longDescription || local.description,
     category: local.category.replace(/-/g, ' '),
-    brand: 'Super+',
+    brand: 'Super Más',
     unitOfMeasure: local.unit,
     imageUrl: local.images[0] || null,
     images: local.images,
@@ -196,21 +209,23 @@ export async function fetchSuperMasCategories(): Promise<string[]> {
     const res = await fetch(`${baseUrl}/api/public/catalogs/categories?channel=supermas`, {
       method: 'GET',
       headers: { Accept: 'application/json' },
-      next: { revalidate: 120 },
+      next: { revalidate: 60 },
     })
     if (res.ok) {
       const json = await res.json()
       if (json.success && Array.isArray(json.data)) {
-        return json.data
+        const valid = json.data.filter((c: unknown): c is string =>
+          typeof c === 'string' && c.trim().length > 0 && !isTestCategory(c),
+        )
+        if (valid.length > 0) return valid
       }
     }
   } catch (e) {
     // ignore
   }
 
-  // Fallback
-  const categoriesSet = new Set(localProducts.map((p) => p.category.replace(/-/g, ' ')))
-  return Array.from(categoriesSet)
+  // Fallback a las categorías oficiales sincronizadas
+  return synchronizedCategories.map((c) => c.name)
 }
 
 function getSuperMasFallback(params?: CatalogQueryParams): {
@@ -220,8 +235,8 @@ function getSuperMasFallback(params?: CatalogQueryParams): {
 } {
   let list = localProducts
 
-  if (params?.search || params?.q) {
-    const term = (params.search || params.q || '').toLowerCase()
+  if (params?.query || params?.search || params?.q) {
+    const term = (params.query || params.search || params.q || '').toLowerCase().trim()
     list = list.filter(
       (p) =>
         p.name.toLowerCase().includes(term) ||
@@ -231,8 +246,11 @@ function getSuperMasFallback(params?: CatalogQueryParams): {
   }
 
   if (params?.category) {
-    const cat = params.category.toLowerCase()
-    list = list.filter((p) => p.category.toLowerCase().includes(cat))
+    const catNorm = slugifyCategory(params.category)
+    list = list.filter((p) => {
+      const pNorm = slugifyCategory(p.category)
+      return pNorm.includes(catNorm) || catNorm.includes(pNorm)
+    })
   }
 
   const mapped: PublicSuperMasProduct[] = list.map((lp) => ({
@@ -243,7 +261,7 @@ function getSuperMasFallback(params?: CatalogQueryParams): {
     slug: lp.slug,
     description: lp.description,
     category: lp.category.replace(/-/g, ' '),
-    brand: 'Super+',
+    brand: 'Super Más',
     unitOfMeasure: lp.unit,
     imageUrl: lp.images[0] || null,
     images: lp.images,
@@ -426,7 +444,7 @@ export function buildDistributorWhatsAppUrl(
     maximumFractionDigits: 0,
   }).format(product.distributorPrice)
 
-  const text = `Hola Distribuidora Super+, deseo solicitar información y cotización mayorista para:\n\n📦 *${product.name}*\n🏷️ *SKU:* ${product.sku}\n💰 *Precio Distribuidor:* ${formattedPrice}\n🔢 *Cantidad deseada:* ${quantity} ${product.unitOfMeasure || 'unidades'}\n\n¿Tienen disponibilidad para despacho?`
+  const text = `Hola Super Más, deseo solicitar información y cotización mayorista para:\n\n📦 *${product.name}*\n🏷️ *SKU:* ${product.sku}\n💰 *Precio Distribuidor:* ${formattedPrice}\n🔢 *Cantidad deseada:* ${quantity} ${product.unitOfMeasure || 'unidades'}\n\n¿Tienen disponibilidad para despacho?`
 
   return `https://wa.me/${targetPhone}?text=${encodeURIComponent(text)}`
 }
@@ -448,7 +466,7 @@ export function buildDistributorBulkWhatsAppUrl(
     return `${idx + 1}. *${item.product.name}* (SKU: ${item.product.sku})\n   - Cantidad: ${item.quantity} ${item.product.unitOfMeasure || 'und'}\n   - P. Unit: ${formatter.format(item.product.distributorPrice)} | Subtotal: ${formatter.format(subtotal)}`
   })
 
-  const text = `Hola Distribuidora Super+, deseo cotizar el siguiente pedido mayorista:\n\n${lines.join('\n\n')}\n\n📊 *Total Estimado:* ${formatter.format(totalEstimate)}\n\nPor favor confirmar disponibilidad y coordinar método de despacho.`
+  const text = `Hola Super Más, deseo cotizar el siguiente pedido mayorista:\n\n${lines.join('\n\n')}\n\n📊 *Total Estimado:* ${formatter.format(totalEstimate)}\n\nPor favor confirmar disponibilidad y coordinar método de despacho.`
 
   return `https://wa.me/${targetPhone}?text=${encodeURIComponent(text)}`
 }

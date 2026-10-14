@@ -7,7 +7,7 @@ import { DistributorCatalogView } from '@/components/distributor/distributor-cat
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Catálogo Distribuidora | Distribuidora Super+',
+    absolute: 'Catálogo Distribuidora | Super Más',
   },
   description:
     'Portal de precios mayoristas y cotizaciones directas para distribuidores y aliados comerciales.',

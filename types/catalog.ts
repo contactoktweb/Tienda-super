@@ -66,6 +66,7 @@ export interface CatalogApiResponse<T> {
 }
 
 export interface CatalogQueryParams {
+  query?: string
   search?: string
   q?: string
   category?: string

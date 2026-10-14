@@ -6,13 +6,14 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { SolarIcon } from '@/components/ui/solar-icon'
 import { mainNav } from '@/data/nav'
-import { categories } from '@/data/categories'
+import { useCategories } from '@/hooks/use-categories'
 import { whatsappLink } from '@/data/site'
 import { cn } from '@/lib/utils'
 
 export function Navigation() {
   const pathname = usePathname()
   const [megaOpen, setMegaOpen] = useState(false)
+  const { categories } = useCategories()
 
   return (
     <nav
@@ -44,13 +45,14 @@ export function Navigation() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 4 }}
                 transition={{ duration: 0.15 }}
-                className="absolute left-0 top-full z-50 w-[30rem] pt-2"
+                className="absolute left-0 top-full z-50 w-[32rem] sm:w-[36rem] pt-2"
               >
-                <div className="grid grid-cols-2 gap-1.5 rounded-xl border border-slate-200 bg-white p-3 shadow-xl">
+                <div className="grid grid-cols-2 gap-1.5 rounded-xl border border-slate-200 bg-white p-3 shadow-xl max-h-[75vh] overflow-y-auto">
                   {categories.map((c) => (
                     <Link
                       key={c.id}
                       href={`/categoria/${c.slug}`}
+                      onClick={() => setMegaOpen(false)}
                       className="group flex items-start gap-2.5 rounded-lg p-2.5 transition-colors hover:bg-slate-50"
                     >
                       <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-slate-100 text-primary transition-colors group-hover:bg-primary group-hover:text-white">

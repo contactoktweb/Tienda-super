@@ -4,11 +4,12 @@ import Link from 'next/link'
 import { SolarIcon } from '@/components/ui/solar-icon'
 import { Logo } from '@/components/ui/logo'
 import { site, whatsappLink } from '@/data/site'
-import { categories } from '@/data/categories'
+import { useCategories } from '@/hooks/use-categories'
 import { mainNav } from '@/data/nav'
 
 export function SiteFooter() {
   const currentYear = new Date().getFullYear()
+  const { categories } = useCategories()
 
   return (
     <footer className="border-t border-slate-800 bg-[#0f172a] text-slate-200">
@@ -21,7 +22,7 @@ export function SiteFooter() {
               <Logo variant="white" height={44} width={155} />
             </div>
             <p className="text-xs leading-relaxed text-slate-400 max-w-sm sm:max-w-none">
-              Distribuidora Super+, todo lo que necesitas en un solo lugar. Productos para el hogar, cuidado personal, ferretería y más.
+              Super Más, todo lo que necesitas en un solo lugar. Productos para la despensa, aseo, cuidado personal y más.
             </p>
             {/* Social icons */}
             <div className="flex items-center justify-center gap-2.5 pt-1 sm:justify-start">
@@ -60,7 +61,7 @@ export function SiteFooter() {
             <h3 className="text-xs font-bold uppercase tracking-wider text-white">
               Categorías
             </h3>
-            <ul className="mt-3.5 space-y-2 text-xs">
+            <ul className="mt-3.5 space-y-1.5 text-xs">
               {categories.map((c) => (
                 <li key={c.id}>
                   <Link
@@ -180,11 +181,11 @@ export function SiteFooter() {
           </div>
 
           <div className="flex items-center justify-center gap-4 text-[11px] text-slate-400 sm:justify-start">
-            <Link href="/nosotros" className="hover:text-white transition-colors">
+            <Link href="/terminos-y-condiciones" className="hover:text-white transition-colors">
               Términos y condiciones
             </Link>
             <span>|</span>
-            <Link href="/contacto" className="hover:text-white transition-colors">
+            <Link href="/politica-de-privacidad" className="hover:text-white transition-colors">
               Política de privacidad
             </Link>
           </div>
