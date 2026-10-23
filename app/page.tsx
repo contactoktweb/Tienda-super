@@ -3,15 +3,11 @@ import Link from 'next/link'
 import { site, whatsappLink } from '@/data/site'
 import { categories as defaultCategories, fetchCategories } from '@/data/categories'
 import {
-  getOnSaleProducts,
-  getBestSellers,
-  getNewProducts,
-} from '@/data/products'
-import {
   fetchSuperMasCatalog,
   adaptSuperMasProductToStore,
 } from '@/lib/api/catalog'
 import { ProductCarousel } from '@/components/product/product-carousel'
+import { CatalogUnavailable } from '@/components/catalog/catalog-unavailable'
 import { SectionHeading } from '@/components/ui/section-heading'
 import { SolarIcon } from '@/components/ui/solar-icon'
 
@@ -28,40 +24,16 @@ export default async function HomePage() {
   const discounted = storeProducts.filter(
     (p) => p.onSale || (p.previousPrice && p.previousPrice > p.price),
   )
-  const onSaleProducts =
-    discounted.length > 0
-      ? discounted
-      : storeProducts.length > 0
-        ? storeProducts
-        : isLive
-          ? []
-          : getOnSaleProducts()
+  const onSaleProducts = discounted.length > 0 ? discounted : storeProducts
 
   // 2. Los Más Vendidos: si hay más de 1 producto en la plataforma o destacados
   const bestSellerList = storeProducts.filter((p) => p.bestSeller)
   const bestSellers =
-    bestSellerList.length > 0
-      ? bestSellerList
-      : storeProducts.length > 1
-        ? storeProducts.slice(1)
-        : storeProducts.length === 1
-          ? []
-          : isLive
-            ? []
-            : getBestSellers()
+    bestSellerList.length > 0 ? bestSellerList : storeProducts.length > 1 ? storeProducts.slice(1) : []
 
   // 3. Nuevos Ingresos
   const newList = storeProducts.filter((p) => p.isNew)
-  const newProducts =
-    newList.length > 0
-      ? newList
-      : storeProducts.length > 2
-        ? storeProducts.slice(2)
-        : storeProducts.length <= 2
-          ? []
-          : isLive
-            ? []
-            : getNewProducts()
+  const newProducts = newList.length > 0 ? newList : storeProducts.length > 2 ? storeProducts.slice(2) : []
 
 
   return (
@@ -265,6 +237,12 @@ export default async function HomePage() {
       </section>
 
       {/* 4. OFERTAS IMPERDIBLES (Product Carousel) */}
+      {!isLive && (
+        <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <CatalogUnavailable />
+        </section>
+      )}
+
       {onSaleProducts.length > 0 && (
         <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeading

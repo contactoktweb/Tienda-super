@@ -91,8 +91,8 @@ function buildQueryString(params?: CatalogQueryParams): string {
   const q = new URLSearchParams()
   const searchTerm = (params.query || params.search || params.q || '').trim()
   if (searchTerm) {
-    // El API del ERP Super Más requiere específicamente 'query' para búsqueda textual
-    q.set('query', searchTerm)
+    // El API del ERP Super Más lee el texto de búsqueda en 'search' (o 'q')
+    q.set('search', searchTerm)
   }
   if (params.category) {
     const cleanCat = params.category.trim()
@@ -135,8 +135,8 @@ export async function fetchSuperMasCatalog(params?: CatalogQueryParams): Promise
     })
 
     if (!res.ok) {
-      console.warn(`[Catalog API] SuperMas returned status ${res.status}. Falling back to local data.`)
-      return getSuperMasFallback(params)
+      console.warn(`[Catalog API] SuperMas returned status ${res.status}. Catalog unavailable.`)
+      return getSuperMasUnavailable(params)
     }
 
     const json: CatalogApiResponse<PublicSuperMasProduct[]> = await res.json()
@@ -148,10 +148,10 @@ export async function fetchSuperMasCatalog(params?: CatalogQueryParams): Promise
       }
     }
 
-    return getSuperMasFallback(params)
+    return getSuperMasUnavailable(params)
   } catch (error) {
     console.warn('[Catalog API] Fetch error connecting to SuperMas ERP:', error)
-    return getSuperMasFallback(params)
+    return getSuperMasUnavailable(params)
   }
 }
 
@@ -176,31 +176,8 @@ export async function fetchSuperMasProductBySlug(slug: string): Promise<PublicSu
     console.warn('[Catalog API] Error fetching product by slug:', error)
   }
 
-  // Fallback local
-  const local = localProducts.find((p) => p.slug === slug)
-  if (!local) return null
-
-  return {
-    id: local.id,
-    sku: local.sku,
-    barcode: null,
-    name: local.name,
-    slug: local.slug,
-    description: local.longDescription || local.description,
-    category: local.category.replace(/-/g, ' '),
-    brand: 'Super Más',
-    unitOfMeasure: local.unit,
-    imageUrl: local.images[0] || null,
-    images: local.images,
-    price: local.price,
-    showPrice: true,
-    vatRatePercent: 0,
-    isExempt: true,
-    availability: local.stock > 0 ? (local.stock < 10 ? 'LOW_STOCK' : 'AVAILABLE') : 'OUT_OF_STOCK',
-    availabilityLabel: local.stock > 0 ? (local.stock < 10 ? 'Pocas unidades' : 'Disponible') : 'Agotado',
-    canBuyDirectly: local.stock > 0,
-    updatedAt: new Date().toISOString(),
-  }
+  // Sin respaldo local: un producto que no viene del ERP no se puede comprar
+  return null
 }
 
 export async function fetchSuperMasCategories(): Promise<string[]> {
@@ -228,67 +205,24 @@ export async function fetchSuperMasCategories(): Promise<string[]> {
   return synchronizedCategories.map((c) => c.name)
 }
 
-function getSuperMasFallback(params?: CatalogQueryParams): {
+/**
+ * Respuesta vacía cuando el ERP no responde. La tienda no muestra productos locales
+ * en el canal Super Más: sus IDs no existen en el ERP y los pedidos serían rechazados.
+ */
+function getSuperMasUnavailable(params?: CatalogQueryParams): {
   products: PublicSuperMasProduct[]
   pagination: CatalogPagination
   isLive: boolean
 } {
-  let list = localProducts
-
-  if (params?.query || params?.search || params?.q) {
-    const term = (params.query || params.search || params.q || '').toLowerCase().trim()
-    list = list.filter(
-      (p) =>
-        p.name.toLowerCase().includes(term) ||
-        p.sku.toLowerCase().includes(term) ||
-        p.category.toLowerCase().includes(term),
-    )
-  }
-
-  if (params?.category) {
-    const catNorm = slugifyCategory(params.category)
-    list = list.filter((p) => {
-      const pNorm = slugifyCategory(p.category)
-      return pNorm.includes(catNorm) || catNorm.includes(pNorm)
-    })
-  }
-
-  const mapped: PublicSuperMasProduct[] = list.map((lp) => ({
-    id: lp.id,
-    sku: lp.sku,
-    barcode: null,
-    name: lp.name,
-    slug: lp.slug,
-    description: lp.description,
-    category: lp.category.replace(/-/g, ' '),
-    brand: 'Super Más',
-    unitOfMeasure: lp.unit,
-    imageUrl: lp.images[0] || null,
-    images: lp.images,
-    price: lp.price,
-    showPrice: true,
-    vatRatePercent: 0,
-    isExempt: true,
-    availability: lp.stock > 0 ? (lp.stock < 10 ? 'LOW_STOCK' : 'AVAILABLE') : 'OUT_OF_STOCK',
-    availabilityLabel: lp.stock > 0 ? (lp.stock < 10 ? 'Pocas unidades' : 'Disponible') : 'Agotado',
-    canBuyDirectly: lp.stock > 0,
-    updatedAt: new Date().toISOString(),
-  }))
-
-  const page = params?.page || 1
-  const pageSize = params?.limit || params?.pageSize || 24
-  const start = (page - 1) * pageSize
-  const paged = mapped.slice(start, start + pageSize)
-
   return {
-    products: paged,
+    products: [],
     pagination: {
-      total: mapped.length,
-      page,
-      pageSize,
-      totalPages: Math.max(1, Math.ceil(mapped.length / pageSize)),
-      hasNextPage: start + pageSize < mapped.length,
-      hasPrevPage: page > 1,
+      total: 0,
+      page: params?.page || 1,
+      pageSize: params?.limit || params?.pageSize || 24,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPrevPage: false,
     },
     isLive: false,
   }
