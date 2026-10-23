@@ -3,14 +3,13 @@
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { SolarIcon } from '@/components/ui/solar-icon'
-import { searchProducts } from '@/data/products'
 import { useCategories } from '@/hooks/use-categories'
-import { slugifyCategory } from '@/data/categories'
 import { formatPrice } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import type { Product } from '@/types'
 
 export function SearchBar({ className }: { className?: string }) {
   const router = useRouter()
@@ -21,15 +20,30 @@ export function SearchBar({ className }: { className?: string }) {
   const [composing, setComposing] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const suggestions = useMemo(() => {
+  const [suggestions, setSuggestions] = useState<Product[]>([])
+
+  // Sugerencias en vivo desde el catálogo del ERP (con retardo para no consultar en cada tecla)
+  useEffect(() => {
     const trimmed = query.trim()
-    if (trimmed.length < 2) return []
-    let results = searchProducts(trimmed)
-    if (category) {
-      const normCat = slugifyCategory(category)
-      results = results.filter((p) => slugifyCategory(p.category) === normCat)
+    if (trimmed.length < 2) {
+      setSuggestions([])
+      return
     }
-    return results.slice(0, 6)
+    const controller = new AbortController()
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams({ q: trimmed })
+      if (category) params.set('categoria', category)
+      fetch(`/api/search?${params.toString()}`, { signal: controller.signal })
+        .then((res) => (res.ok ? res.json() : { products: [] }))
+        .then((json: { products?: Product[] }) => setSuggestions(json.products ?? []))
+        .catch(() => {
+          // abortada o sin conexión: se conservan las sugerencias anteriores
+        })
+    }, 250)
+    return () => {
+      clearTimeout(timer)
+      controller.abort()
+    }
   }, [query, category])
 
   useEffect(() => {

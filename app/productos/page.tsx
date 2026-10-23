@@ -4,6 +4,7 @@ import {
   adaptSuperMasProductToStore,
 } from '@/lib/api/catalog'
 import { CategoryView } from '@/components/category/category-view'
+import { CatalogUnavailable } from '@/components/catalog/catalog-unavailable'
 
 export const metadata: Metadata = {
   title: 'Tienda Online | Catálogo Super Más',
@@ -21,7 +22,7 @@ export default async function ProductosPage({
   const resolvedParams = await searchParams
   const selectedCategory = resolvedParams.categoria
 
-  const { products: apiProducts } = await fetchSuperMasCatalog({
+  const { products: apiProducts, isLive } = await fetchSuperMasCatalog({
     category: selectedCategory,
     limit: 100,
   })
@@ -43,7 +44,8 @@ export default async function ProductosPage({
   ]
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 space-y-4">
+      {!isLive && <CatalogUnavailable />}
       <CategoryView
         category={tiendaCategory}
         initialProducts={initialProducts}

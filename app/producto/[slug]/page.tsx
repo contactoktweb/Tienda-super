@@ -5,7 +5,6 @@ import {
   fetchSuperMasCatalog,
   adaptSuperMasProductToStore,
 } from '@/lib/api/catalog'
-import { getRelatedProducts, products as localFallbackProducts } from '@/data/products'
 import { site } from '@/data/site'
 import { ProductDetailView } from '@/components/product/product-detail-view'
 
@@ -68,11 +67,6 @@ export default async function ProductDetailPage({
     }
   } catch {
     // ignore
-  }
-
-  // Only fall back to local mock products if API is completely offline
-  if (relatedProducts.length === 0 && !isApiLive) {
-    relatedProducts = getRelatedProducts(product)
   }
 
   return (

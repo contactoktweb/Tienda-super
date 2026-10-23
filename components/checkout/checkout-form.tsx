@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
@@ -13,6 +13,7 @@ import { useCartStore, selectCount, selectSubtotal } from '@/stores/cart-store'
 import { useHydrated } from '@/hooks/use-hydrated'
 import { formatPrice } from '@/lib/format'
 import { site, whatsappLink } from '@/data/site'
+import type { CartItem } from '@/types'
 import { Input, Textarea } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
@@ -23,6 +24,9 @@ export function CheckoutForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [orderResult, setOrderResult] = useState<OrderResult | null>(null)
   const [submittedData, setSubmittedData] = useState<CheckoutFormValues | null>(null)
+  const [submittedItems, setSubmittedItems] = useState<CartItem[]>([])
+  // Una clave por intento de compra: si la red falla y el cliente reintenta, el ERP no duplica el pedido
+  const idempotencyKey = useRef<string>(crypto.randomUUID())
 
   const subtotal = hydrated ? selectSubtotal(items) : 0
   const count = hydrated ? selectCount(items) : 0
@@ -58,6 +62,7 @@ export function CheckoutForm() {
     try {
       setIsSubmitting(true)
       const res = await createOrder({
+        idempotencyKey: idempotencyKey.current,
         customer: data,
         items,
         subtotal,
@@ -68,10 +73,16 @@ export function CheckoutForm() {
 
       setOrderResult(res)
       setSubmittedData(data)
+      setSubmittedItems(items)
       clearCart()
+      idempotencyKey.current = crypto.randomUUID()
       toast.success('¡Pedido registrado con éxito!')
     } catch (err) {
-      toast.error('Ocurrió un error al procesar el pedido. Por favor intenta de nuevo.')
+      toast.error(
+        err instanceof Error && err.message
+          ? err.message
+          : 'Ocurrió un error al procesar el pedido. Por favor intenta de nuevo.',
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -85,7 +96,11 @@ export function CheckoutForm() {
     msg += `- Teléfono: ${submittedData.phone}\n`
     msg += `- Ciudad: ${submittedData.cityName}, ${submittedData.department}\n`
     msg += `- Dirección: ${submittedData.address} (${submittedData.neighborhood})\n\n`
-    msg += `*Subtotal:* ${formatPrice(subtotal)}\n`
+    msg += `*Productos:*\n`
+    for (const item of submittedItems) {
+      msg += `- ${item.quantity} x ${item.name}\n`
+    }
+    msg += `\n*Total:* ${formatPrice(orderResult.total)}\n`
     msg += `Quedo atento(a) para coordinar el pago y envío. ¡Muchas gracias!`
     return msg
   }

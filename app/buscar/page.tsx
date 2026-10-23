@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { searchProducts, products as localProducts } from '@/data/products'
-import { getCategoryBySlug, getCategoryBySlugAsync, slugifyCategory } from '@/data/categories'
+import { getCategoryBySlugAsync } from '@/data/categories'
 import {
   fetchSuperMasCatalog,
   adaptSuperMasProductToStore,
@@ -9,6 +8,7 @@ import {
 import { site } from '@/data/site'
 import { ProductGrid } from '@/components/product/product-grid'
 import { SolarIcon } from '@/components/ui/solar-icon'
+import { CatalogUnavailable } from '@/components/catalog/catalog-unavailable'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,36 +27,12 @@ export default async function BuscarPage({
   const categorySlug = (params.categoria || '').trim()
   const category = categorySlug ? await getCategoryBySlugAsync(categorySlug) : null
 
-  let results: ReturnType<typeof adaptSuperMasProductToStore>[] = []
-  try {
-    const apiRes = await fetchSuperMasCatalog({
-      query,
-      search: query,
-      category: category ? category.name : categorySlug,
-      limit: 60,
-    })
-    if (apiRes.products.length > 0) {
-      results = apiRes.products.map(adaptSuperMasProductToStore)
-    }
-  } catch (err) {
-    console.warn('[BuscarPage] Error fetching ERP catalog:', err)
-  }
-
-  // Complementar con catálogo local de productos filtrados
-  let localList = query ? searchProducts(query) : localProducts
-  if (categorySlug) {
-    const targetSlug = slugifyCategory(categorySlug)
-    localList = localList.filter((p) => slugifyCategory(p.category) === targetSlug)
-  }
-
-  // Fusionar sin duplicados (priorizando productos devueltos por el ERP)
-  const existingSlugs = new Set(results.map((p) => p.slug))
-  for (const lp of localList) {
-    if (!existingSlugs.has(lp.slug)) {
-      results.push(lp)
-      existingSlugs.add(lp.slug)
-    }
-  }
+  const apiRes = await fetchSuperMasCatalog({
+    search: query,
+    category: category ? category.name : categorySlug,
+    limit: 60,
+  })
+  const results = apiRes.products.map(adaptSuperMasProductToStore)
 
   const pageTitle = query
     ? category
@@ -138,6 +114,11 @@ export default async function BuscarPage({
 
       {/* Results */}
       <div>
+        {!apiRes.isLive && (
+          <div className="mb-4">
+            <CatalogUnavailable />
+          </div>
+        )}
         <div className="flex items-center justify-between mb-4 text-xs text-muted-foreground">
           <span>{results.length} {results.length === 1 ? 'resultado encontrado' : 'resultados encontrados'}</span>
         </div>
