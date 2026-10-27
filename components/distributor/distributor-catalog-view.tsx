@@ -426,6 +426,7 @@ export function DistributorCatalogView({
                       {/* Distributor Price */}
                       <td className="px-3 py-3 font-heading font-black text-slate-900 text-sm">
                         {formatPrice(product.distributorPrice)}
+                        <span className="block text-[10px] font-semibold text-slate-500">IVA incluido</span>
                       </td>
 
                       {/* Quantity Input */}

@@ -378,7 +378,7 @@ export function buildDistributorWhatsAppUrl(
     maximumFractionDigits: 0,
   }).format(product.distributorPrice)
 
-  const text = `Hola Super Más, deseo solicitar información y cotización mayorista para:\n\n📦 *${product.name}*\n🏷️ *SKU:* ${product.sku}\n💰 *Precio Distribuidor:* ${formattedPrice}\n🔢 *Cantidad deseada:* ${quantity} ${product.unitOfMeasure || 'unidades'}\n\n¿Tienen disponibilidad para despacho?`
+  const text = `Hola Super Más, deseo solicitar información y cotización mayorista para:\n\n📦 *${product.name}*\n🏷️ *SKU:* ${product.sku}\n💰 *Precio Distribuidor (IVA incluido):* ${formattedPrice}\n🔢 *Cantidad deseada:* ${quantity} ${product.unitOfMeasure || 'unidades'}\n\n¿Tienen disponibilidad para despacho?`
 
   return `https://wa.me/${targetPhone}?text=${encodeURIComponent(text)}`
 }
@@ -400,7 +400,7 @@ export function buildDistributorBulkWhatsAppUrl(
     return `${idx + 1}. *${item.product.name}* (SKU: ${item.product.sku})\n   - Cantidad: ${item.quantity} ${item.product.unitOfMeasure || 'und'}\n   - P. Unit: ${formatter.format(item.product.distributorPrice)} | Subtotal: ${formatter.format(subtotal)}`
   })
 
-  const text = `Hola Super Más, deseo cotizar el siguiente pedido mayorista:\n\n${lines.join('\n\n')}\n\n📊 *Total Estimado:* ${formatter.format(totalEstimate)}\n\nPor favor confirmar disponibilidad y coordinar método de despacho.`
+  const text = `Hola Super Más, deseo cotizar el siguiente pedido mayorista:\n\n${lines.join('\n\n')}\n\n📊 *Total Estimado (IVA incluido):* ${formatter.format(totalEstimate)}\n\nPor favor confirmar disponibilidad y coordinar método de despacho.`
 
   return `https://wa.me/${targetPhone}?text=${encodeURIComponent(text)}`
 }
