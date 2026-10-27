@@ -16,7 +16,10 @@ export interface PublicSuperMasProduct {
   unitOfMeasure: string
   imageUrl: string | null
   images: string[]
+  /** Precio de venta CON IVA (lo que paga el cliente). */
   price: number
+  /** Precio antes de IVA. */
+  priceBeforeTax?: number
   showPrice: boolean
   vatRatePercent: number
   isExempt: boolean
@@ -38,8 +41,13 @@ export interface PublicDistributorProduct {
   unitOfMeasure: string
   imageUrl: string | null
   images: string[]
+  /** Precio mayorista CON IVA. */
   distributorPrice: number
+  /** Precio mayorista antes de IVA. */
+  distributorPriceBeforeTax?: number
+  /** Precio al público CON IVA. */
   normalPrice: number | null
+  vatRatePercent?: number
   availability: ProductAvailability
   availabilityLabel: string
   canBuyDirectly: boolean

@@ -174,7 +174,7 @@ export function CartDrawer() {
                 {/* Summary & Actions */}
                 <div className="border-t border-border bg-slate-50 p-4 space-y-3">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground uppercase font-bold tracking-wider">Subtotal</span>
+                    <span className="text-muted-foreground uppercase font-bold tracking-wider">Subtotal (IVA incluido)</span>
                     <span className="text-base font-bold text-foreground">{formatPrice(subtotal)}</span>
                   </div>
 

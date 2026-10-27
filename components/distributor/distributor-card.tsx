@@ -122,6 +122,7 @@ export function DistributorCard({
             <span className="font-heading text-lg sm:text-xl font-extrabold text-slate-900">
               {formatPrice(product.distributorPrice)}
             </span>
+            <span className="text-[10px] font-semibold text-slate-500">IVA incluido</span>
           </div>
         </div>
 

@@ -321,6 +321,7 @@ export function CheckoutForm() {
               <span>Total Estimado</span>
               <span className="text-primary">{formatPrice(subtotal)}</span>
             </div>
+            <p className="text-[11px] text-muted-foreground text-right">Precios con IVA incluido</p>
           </div>
 
           <div className="rounded border border-border bg-slate-50 p-2.5 text-[11px] text-muted-foreground flex items-start gap-2">

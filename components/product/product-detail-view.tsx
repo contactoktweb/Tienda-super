@@ -206,7 +206,7 @@ export function ProductDetailView({
                 {formatPrice(product.price)}
               </span>
               <span className="text-xs font-bold uppercase text-slate-400">
-                COP
+                COP · IVA incluido
               </span>
               {product.previousPrice && product.previousPrice > product.price ? (
                 <span className="ml-2 text-sm text-slate-400 line-through">
